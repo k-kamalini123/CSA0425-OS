@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+typedef struct {
+    int processID;
+    int arrivalTime;
+    int burstTime;
+    int priority;
+    int waitingTime;
+    int turnaroundTime;
+} Process;
+void priorityScheduling(Process* processes, int numProcesses) {
+    int currentTime = 0;
+    int completedProcesses = 0;
+    while (completedProcesses < numProcesses) {
+        int highestPriority = -1;
+        int highestPriorityIndex = -1;
+        for (int i = 0; i < numProcesses; i++) {
+            if (processes[i].arrivalTime <= currentTime && processes[i].priority > highestPriority && processes[i].burstTime > 0) {
+                highestPriority = processes[i].priority;
+                highestPriorityIndex = i;
+            }
+        }
+        if (highestPriorityIndex == -1) {
+            currentTime++;
+            continue;
+        }
+        processes[highestPriorityIndex].burstTime--;
+        currentTime++;
+        for (int i = 0; i < numProcesses; i++) {
+            if (i != highestPriorityIndex && processes[i].arrivalTime <= currentTime && processes[i].burstTime > 0) {
+                processes[i].waitingTime++;
+            }
+        }
+        if (processes[highestPriorityIndex].burstTime == 0) {
+            completedProcesses++;
+            processes[highestPriorityIndex].turnaroundTime = currentTime - processes[highestPriorityIndex].arrivalTime;
+        }
+    }
+}
+
+int main() {
+    int numProcesses;
+	printf("Enter the number of processes: ");
+    scanf("%d", &numProcesses);
+    Process* processes = (Process*)malloc(numProcesses * sizeof(Process));
+    for (int i = 0; i < numProcesses; i++) 
+	{
+        printf("Enter details for process %d:\n", i + 1);
+        printf("Process ID: ");
+        scanf("%d", &processes[i].processID);
+        printf("Arrival Time: ");
+        scanf("%d", &processes[i].arrivalTime);
+        printf("Burst Time: ");
+        scanf("%d", &processes[i].burstTime);
+        printf("Priority: ");
+        scanf("%d", &processes[i].priority);
+        processes[i].waitingTime = 0;
+        processes[i].turnaroundTime = 0;
+    }
+    printf("\nPriority Scheduling Result:\n");
+    priorityScheduling(processes, numProcesses);
+    printf("\nProcess\tWaiting Time\tTurnaround Time\n");
+    int totalWaitingTime = 0;
+    int totalTurnaroundTime = 0;
+    for (int i = 0; i < numProcesses; i++)
+	{
+        printf("%d\t%d\t\t%d\n", processes[i].processID, processes[i].waitingTime, processes[i].turnaroundTime);
+        totalWaitingTime += processes[i].waitingTime;
+        totalTurnaroundTime += processes[i].turnaroundTime;
+    }
+    double avgWaitingTime = (double)totalWaitingTime / numProcesses;
+    double avgTurnaroundTime = (double)totalTurnaroundTime / numProcesses;
+    printf("\nAverage Waiting Time: %.2lf\n", avgWaitingTime);
+    printf("Average Turnaround Time: %.2lf\n", avgTurnaroundTime);
+    free(processes);
+    return 0;
+}
