@@ -1,0 +1,50 @@
+#include <stdio.h>
+
+#define BLOCK_SIZE 8192
+#define POINTER_SIZE 4
+#define DIRECT_BLOCKS 12
+#define SINGLE_INDIRECT_BLOCKS (BLOCK_SIZE / POINTER_SIZE)
+#define DOUBLE_INDIRECT_BLOCKS (BLOCK_SIZE / POINTER_SIZE * SINGLE_INDIRECT_BLOCKS)
+#define TRIPLE_INDIRECT_BLOCKS (BLOCK_SIZE / POINTER_SIZE * DOUBLE_INDIRECT_BLOCKS)
+
+unsigned long long getMaxFileSize()
+{
+    unsigned long long maxFileSize = 0;
+    unsigned long long totalBlocks = DIRECT_BLOCKS;
+    unsigned long long remainingBlocks = BLOCK_SIZE / POINTER_SIZE - 1;
+
+    // Calculate the maximum file size using direct blocks
+    maxFileSize += totalBlocks * BLOCK_SIZE;
+
+    // Calculate the maximum file size using single indirect blocks
+    totalBlocks += SINGLE_INDIRECT_BLOCKS;
+    remainingBlocks -= SINGLE_INDIRECT_BLOCKS;
+    maxFileSize += totalBlocks * BLOCK_SIZE;
+
+    // Calculate the maximum file size using double indirect blocks
+    totalBlocks += DOUBLE_INDIRECT_BLOCKS;
+    remainingBlocks -= DOUBLE_INDIRECT_BLOCKS;
+    maxFileSize += totalBlocks * BLOCK_SIZE;
+
+    // Calculate the maximum file size using triple indirect blocks
+    totalBlocks += TRIPLE_INDIRECT_BLOCKS;
+    remainingBlocks -= TRIPLE_INDIRECT_BLOCKS;
+    maxFileSize += totalBlocks * BLOCK_SIZE;
+
+    // Calculate the maximum file size using remaining blocks
+    while (remainingBlocks > 0)
+    {
+        maxFileSize += remainingBlocks * BLOCK_SIZE;
+        remainingBlocks = remainingBlocks * (BLOCK_SIZE / POINTER_SIZE);
+    }
+
+    return maxFileSize;
+}
+
+int main()
+{
+    unsigned long long maxFileSize = getMaxFileSize();
+    printf("Maximum file size that can be sorted: %llu bytes\n", maxFileSize);
+
+    return 0;
+}
